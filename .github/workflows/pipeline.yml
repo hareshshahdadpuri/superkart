@@ -1,0 +1,32 @@
+name: End-to-End SuperKart Sales Forecasting MLOps Pipeline
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  orchestrate-mlops-lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone Repository
+      uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy scikit-learn==1.3.* joblib datasets huggingface_hub
+    - name: Step 1 - Data Registration
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: python src/data_prep.py
+    - name: Step 2 - Model Training
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: python src/train.py
+    - name: Step 3 - Deploy Sync
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: python src/deploy.py
